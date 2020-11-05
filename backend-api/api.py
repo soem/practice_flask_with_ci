@@ -20,7 +20,7 @@ def user_get_profile():
 def user_force_update():
     return "<h1>Hello Flask!</h1>"
 
-@app.route('/api/user/v1/DELETE', methods=['DELETE'])
+@app.route('/api/user/v1/delete', methods=['DELETE'])
 def user_delete():
     return "<h1>Hello Flask!</h1>"
 
