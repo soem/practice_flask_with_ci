@@ -1,8 +1,17 @@
 import flask
+import json
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
+data = {
+    "name": "Charles",
+    "job_title": "SRE",
+    "communicate_information": {
+        "email": "charles@gmail.com",
+        "mobile": "0911111111"
+    }
+}
 
 @app.route('/', methods=['GET'])
 def home():
@@ -14,7 +23,7 @@ def create_user():
 
 @app.route('/api/user/v1/get_profile', methods=['GET'])
 def user_get_profile():
-    return "<h1>Hello Flask!</h1>"
+    return json.dumps(data)
 
 @app.route('/api/user/v1/force_update', methods=['PUT'])
 def user_force_update():
