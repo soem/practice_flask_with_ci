@@ -1,7 +1,8 @@
 FROM python:3.9-alpine
 
 RUN \
-    pip install flask
+    pip install flask && \
+    pip install flask-sqlalchemy
 
 COPY api.py /app/api.py
 
