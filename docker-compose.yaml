@@ -6,3 +6,12 @@ services:
     ports:
       - 8080:8080
 
+  postgres:
+    image: postgres:12-alpine
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5432:5432
+

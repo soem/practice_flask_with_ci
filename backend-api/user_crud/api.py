@@ -3,6 +3,11 @@
 import flask
 import json
 
+from table_users import User, CommunicateInformation, Base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from datetime import datetime
+
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
@@ -25,6 +30,8 @@ def create_user():
 
 @app.route('/api/user/v1/get_profile', methods=['GET'])
 def user_get_profile():
+    session = Session()
+    session.close()
     return json.dumps(data)
 
 @app.route('/api/user/v1/force_update', methods=['PUT'])
@@ -45,4 +52,12 @@ def health():
     return 'ok'
 
 if __name__ == '__main__':
+    engine = create_engine('postgresql://postgres:postgres@postgres/postgres', echo=True)
+
+    Base.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
+
+    Session = sessionmaker(bind=engine)
+
     app.run(host='0.0.0.0', port=8080)
+
