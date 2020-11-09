@@ -11,8 +11,11 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
     job_title = Column(String, nullable=False)
+
+    communicate_information = relationship(
+        "CommunicateInformation", uselist=False, back_populates="user")
 
     def __repr__(self):
         return "<User(name='%s', job_title='%s')>" % (
@@ -32,5 +35,3 @@ class CommunicateInformation(Base):
         return "<User(email='%s', mobile='%s')>" % (
             self.email, self.mobile)
 
-User.communicate_information = relationship(
-    "CommunicateInformation", order_by=CommunicateInformation.id, back_populates="user")

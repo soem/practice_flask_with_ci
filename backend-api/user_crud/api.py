@@ -12,6 +12,19 @@ from datetime import datetime
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
+def check_user_data(user_data):
+    data_keys = user_data.keys()
+    for key in ['name', 'job_title', 'communicate_information']:
+        if key not in data_keys:
+            return False
+
+    data_comm_keys = user_data['communicate_information'].keys()
+    for key in ['email', 'mobile']:
+        if key not in data_comm_keys:
+            return False
+    
+    return True
+
 data = {
     "name": "Charles",
     "job_title": "SRE",
@@ -27,45 +40,90 @@ def home():
 
 @app.route('/api/user/v1/create', methods=['POST'])
 def create_user():
-    post_data = request.get_json()
-    if post_data == None:
-        return 'bad'
+    post_data_str = request.get_json()
+    if post_data_str == None:
+        return Response(
+            '{"msg": "post empty data!"}',
+            status=400,
+            mimetype='application/json'
+        )
+
+    post_data = json.loads(post_data_str)
+    if not check_user_data(post_data):
+        return Response(
+            '{"msg": "post format error!"}',
+            status=400,
+            mimetype='application/json'
+        )
 
     name = post_data['name']
     job_title = post_data['job_title']
-    new_user = User(name=name, job_title=job_title)
+    comm_info = post_data['communicate_information']
 
     session = Session()
     try:
-        user = session.query(User).filter(User.name==name).first()
-        print(user)
-        if user != None:
-            print(user)
+        new_user = User(name=name, job_title=job_title)
+        session.add(new_user)
+        session.commit()
+
+        new_user_comm = CommunicateInformation(email=comm_info['email'], mobile=comm_info['mobile'],user_id=new_user.id)
+        session.add(new_user_comm)
+        session.commit()
+
+        res = Response(
+            '{"msg": "creation succeed!!"}',
+            status=201,
+            mimetype='application/json'
+        )
+
     except exc.SQLAlchemyError:
-        user_profile = {}
+        session.rollback()
+        res = Response(
+            '{"msg": "creation failed!!"}',
+            status=500,
+            mimetype='application/json'
+        )
 
     finally:
         session.close()
 
-    return '{"msg": "Created."}'
+    return res
 
 @app.route('/api/user/v1/get_profile', methods=['GET'])
 def user_get_profile():
     name = request.args.get('name')
     session = Session()
     try:
-        user_profile = session.query(CommunicateInformation).\
-                            join(CommunicateInformation.user).\
+        user_data = session.query(User).\
+                            join(User.communicate_information).\
                             filter(User.name==name).first()
+
+        if user_data:
+            user_profile_res = {
+                "name": user_data.name,
+                "job_title": user_data.job_title,
+                "communicate_information": {
+                    "email": user_data.communicate_information.email,
+                    "mobile": user_data.communicate_information.mobile
+                }
+            }
+
+        else:
+            user_profile_res = None
+
     except exc.SQLAlchemyError as e:
         print(e)
-        user_profile = None
+        user_profile_res = None
 
     finally:
         session.close()
 
-    if user_profile:
-        return json.dumps(user_profile)
+    if user_profile_res:
+        return Response(
+            json.dumps(user_profile_res),
+            status=200,
+            mimetype='application/json'
+        )
 
     return Response(
         '{"msg": "%s not found!"}' % (name),
@@ -75,29 +133,102 @@ def user_get_profile():
 
 @app.route('/api/user/v1/force_update', methods=['PUT'])
 def user_force_update():
-    return "<h1>Hello Flask!</h1>"
+    post_data_str = request.get_json()
+    old_name = request.args.get('name')
+    if not old_name:
+        return Response(
+            '{"msg": "name parameter should not be empty!"}',
+            status=400,
+            mimetype='application/json'
+        )
 
-@app.route('/api/user/v1/delete', methods=['DELETE'])
-def user_delete():
-    name = request.args.post('name')
+    if post_data_str == None:
+        return Response(
+            '{"msg": "post empty data!"}',
+            status=400,
+            mimetype='application/json'
+        )
+
+    post_data = json.loads(post_data_str)
+    if not check_user_data(post_data):
+        return Response(
+            '{"msg": post format error!"}',
+            status=400,
+            mimetype='application/json'
+        )
+
+    name = post_data['name']
+    job_title = post_data['job_title']
+    comm_info = post_data['communicate_information']
+
     session = Session()
     try:
-        user_profile = session.query(CommunicateInformation).\
-                            join(CommunicateInformation.user).\
-                            filter(User.name==name).first()
+        user_data = session.query(User).filter(User.name==old_name).first()
+        if user_data == None:
+            res = Response(
+                '{"msg": "%s not found!"}' % (old_name),
+                status=404,
+                mimetype='application/json'
+            )
+        else:
+            print(user_data.communicate_information)
+            session.query(CommunicateInformation).\
+                            filter(CommunicateInformation.user_id==user_data.id).\
+                            update({'email': comm_info['email'], 'mobile': comm_info['mobile']})
+            session.query(User).filter(User.name==old_name).update({'name': name, 'job_title': job_title})
+            session.commit()
 
-        session.delete(user_profile)
-        session.delete(user_profile.User)
-        session.commit()
+            res = Response(
+                '{"msg": "upsert succeed!!"}',
+                status=201,
+                mimetype='application/json'
+            )
+
     except exc.SQLAlchemyError as e:
         print(e)
-        user_profile = None
+        session.rollback()
+        res = Response(
+            '{"msg": "upsert failed!!"}',
+            status=500,
+            mimetype='application/json'
+        )
 
     finally:
         session.close()
 
-    if user_profile:
-        return json.dumps(user_profile)
+    return res
+
+@app.route('/api/user/v1/delete', methods=['DELETE'])
+def user_delete():
+    name = request.args.get('name')
+    session = Session()
+    try:
+        user_data = session.query(User).\
+                            join(User.communicate_information).\
+                            filter(User.name==name).first()
+        if user_data == None:
+            succeed = False
+
+        else:
+            session.delete(user_data.communicate_information)
+            session.delete(user_data)
+            session.commit()
+            succeed = True
+
+    except exc.SQLAlchemyError as e:
+        print(e)
+        succeed = False
+
+    finally:
+        session.close()
+
+
+    if succeed:
+        return Response(
+            '{"msg": "%s has been deleted!"}' % (name),
+            status=202,
+            mimetype='application/json'
+        )
 
     return Response(
         '{"msg": "%s not found!"}' % (name),
