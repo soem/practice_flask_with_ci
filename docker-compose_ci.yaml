@@ -1,0 +1,26 @@
+version: "2.4"
+services:
+  backend-api:
+    build: ./backend-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ci
+
+  postgres:
+    image: postgres:12-alpine
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "/usr/local/bin/pg_isready -U postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ci
+
+networks:
+  ci:
