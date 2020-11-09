@@ -1,10 +1,12 @@
-
 version: "2.4"
 services:
   backend-api:
     build: ./backend-api
     ports:
       - 8080:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: postgres:12-alpine
@@ -14,4 +16,9 @@ services:
       - POSTGRES_PASSWORD=postgres
     ports:
       - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "/usr/local/bin/pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
