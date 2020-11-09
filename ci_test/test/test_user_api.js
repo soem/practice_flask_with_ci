@@ -13,7 +13,7 @@ let user_info_get = JSON.parse(fs.readFileSync('test/user_info/user_info_2.json'
 let user_info_delete = JSON.parse(fs.readFileSync('test/user_info/user_info_2.json'));
 
 describe("Backend API - User", function () {
-    it("should response 200 when POST to user create api", function () {
+    xit("should response 200 when POST to user create api", function () {
         return chakram.post(host + '/api/user/v1/create', JSON.stringify(user_info_1), {
             headers: {
                 'content-type': 'application/json'
@@ -30,7 +30,7 @@ describe("Backend API - User", function () {
             });
     });
 
-    it("should response 200 when GET to user get_profile api", function () {
+    xit("should response 200 when GET to user get_profile api", function () {
         return chakram.get(host + '/api/user/v1/get_profile')
             .then(function (response) {
                 expect(response).to.have.status(200);
@@ -38,7 +38,7 @@ describe("Backend API - User", function () {
             });
     });
 
-    it("should response 200 when PUT to user force_update api", function () {
+    xit("should response 200 when PUT to user force_update api", function () {
         return chakram.put(host + '/api/user/v1/force_update', JSON.stringify(user_info_2), {
             headers: {
                 'content-type': 'application/json'
@@ -55,7 +55,7 @@ describe("Backend API - User", function () {
             });
     });
 
-    it("should response 200 when DELETE to user delete api", function () {
+    xit("should response 200 when DELETE to user delete api", function () {
         return chakram.delete(host + '/api/user/v1/delete', '')
             .then(function (response) {
                 expect(response).to.have.status(200);
