@@ -41,15 +41,14 @@ def home():
 
 @app.route('/api/user/v1/create', methods=['POST'])
 def create_user():
-    post_data_str = request.get_json()
-    if post_data_str == None:
+    post_data = request.get_json()
+    if post_data is None:
         return Response(
             '{"msg": "post empty data!"}',
             status=400,
             mimetype='application/json'
         )
 
-    post_data = json.loads(post_data_str)
     if not check_user_data(post_data):
         return Response(
             '{"msg": "post format error!"}',
@@ -134,7 +133,7 @@ def user_get_profile():
 
 @app.route('/api/user/v1/force_update', methods=['PUT'])
 def user_force_update():
-    post_data_str = request.get_json()
+    post_data = request.get_json()
     old_name = request.args.get('name')
     if not old_name:
         return Response(
@@ -143,14 +142,13 @@ def user_force_update():
             mimetype='application/json'
         )
 
-    if post_data_str == None:
+    if post_data is None:
         return Response(
             '{"msg": "post empty data!"}',
             status=400,
             mimetype='application/json'
         )
 
-    post_data = json.loads(post_data_str)
     if not check_user_data(post_data):
         return Response(
             '{"msg": post format error!"}',

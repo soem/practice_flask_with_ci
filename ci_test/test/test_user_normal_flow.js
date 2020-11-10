@@ -12,7 +12,7 @@ let user_info_2 = JSON.parse(fs.readFileSync('test/user_info/user_info_2.json'))
 
 describe("Backend API - User Normal Flow", function () {
     it("should finish flow when run with create, get, update, delete apis", function () {
-        return chakram.post(host + '/api/user/v1/create', JSON.stringify(user_info_1), {
+        return chakram.post(host + '/api/user/v1/create', user_info_1, {
             headers: {
                 'content-type': 'application/json'
             }
@@ -26,7 +26,7 @@ describe("Backend API - User Normal Flow", function () {
             expect(get_response).to.have.status(200);
             expect(get_response).to.comprise.of.json(user_info_1);
 
-            return chakram.put(host + '/api/user/v1/force_update?name=' + user_info_1['name'], JSON.stringify(user_info_2), {
+            return chakram.put(host + '/api/user/v1/force_update?name=' + user_info_1['name'], user_info_2, {
                 headers: {
                     'content-type': 'application/json'
                 }
