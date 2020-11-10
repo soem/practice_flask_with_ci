@@ -2,7 +2,7 @@ var chakram = require('chakram'),
     expect = chakram.expect;
 const fs = require('fs');
 
-hostname = 'practice_flask_with_token_based_aa_backend-api_1'
+hostname = 'practice_flask_with_ci_backend-api_1'
 hostname_header = ''
 port = '8080'
 host = 'http://' + hostname + ':' + port
