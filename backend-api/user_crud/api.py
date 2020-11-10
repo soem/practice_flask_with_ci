@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
+import os
+import json
 import flask
 from flask import request, Response
-import json
 
 from table_users import User, CommunicateInformation, Base
 from sqlalchemy import create_engine, exc
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime
-import os
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -25,15 +24,6 @@ def check_user_data(user_data):
             return False
     
     return True
-
-data = {
-    "name": "Charles",
-    "job_title": "SRE",
-    "communicate_information": {
-        "email": "charles@gmail.com",
-        "mobile": "0911111111"
-    }
-}
 
 @app.route('/', methods=['GET'])
 def home():
