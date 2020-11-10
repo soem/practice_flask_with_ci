@@ -1,6 +1,7 @@
 #!/bin/bash
 
 
+docker-compose -f docker-compose_ci.yaml build
 docker-compose -f docker-compose_ci.yaml up -d
 
 docker build -t test-nodejs ci_test

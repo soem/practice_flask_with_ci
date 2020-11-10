@@ -4,16 +4,16 @@ services:
     build: ./backend-api
     ports:
       - 8080:8080
+    env_file:
+      - env.example
     depends_on:
       postgres:
         condition: service_healthy
 
   postgres:
     image: postgres:12-alpine
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+    env_file:
+      - env.example
     ports:
       - 5432:5432
     healthcheck:

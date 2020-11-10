@@ -8,6 +8,7 @@ from table_users import User, CommunicateInformation, Base
 from sqlalchemy import create_engine, exc
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
+import os
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -246,7 +247,16 @@ def health():
     return 'ok'
 
 if __name__ == '__main__':
-    engine = create_engine('postgresql://postgres:postgres@postgres/postgres', echo=True)
+    postgres_db = os.environ['POSTGRES_DB']
+    postgres_user = os.environ['POSTGRES_USER']
+    postgres_password = os.environ['POSTGRES_PASSWORD']
+
+    postgres_host = os.environ['POSTGRES_HOST']
+
+    engine = create_engine(
+                 'postgresql://%s:%s@%s/%s' % (postgres_user, postgres_password, postgres_host, postgres_db),
+                 echo=True
+             )
 
     Base.metadata.create_all(engine)
     Base.metadata.create_all(engine)
